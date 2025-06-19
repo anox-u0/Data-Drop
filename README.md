@@ -1,8 +1,8 @@
-DataDrop: Interactive Data Visualization Tool
+# DataDrop: Interactive Data Visualization Tool
 Drop it Hot
 
 DataDrop is a modern and interactive web application that allows users to effortlessly visualize their CSV data and gain AI-powered insights. With a user-friendly interface, multiple chart types, and smart data handling, DataDrop makes understanding your data a seamless experience.
-✨ Features
+## ✨ Features
 
     CSV Upload: Easily upload your data via intuitive drag-and-drop or file browsing.
 
@@ -30,7 +30,7 @@ DataDrop is a modern and interactive web application that allows users to effort
 
     Responsive UI/UX: A clean, intuitive design that adapts well to various screen sizes, featuring custom shadows and modern UI tweaks.
 
-🚀 How to Use
+## 🚀 How to Use
 
     Open the Application: Open the index.html file in your web browser.
 
@@ -56,23 +56,7 @@ DataDrop is a modern and interactive web application that allows users to effort
 
     Toggle Theme: Use the sun/moon icon button in the top-right corner to switch between light and dark modes.
 
-🛠️ Technologies Used
-
-    HTML5: Structure of the web application.
-
-    CSS3 (Tailwind CSS): For modern, responsive styling and rapid UI development.
-
-    JavaScript (ES6+): Core logic, DOM manipulation, data parsing, and API integration.
-
-    Chart.js: Powerful and flexible charting library for creating interactive data visualizations.
-
-    Chart.js Luxon Adapter: Enables advanced time-series charting capabilities with Chart.js.
-
-    Phosphor Icons: A flexible icon library used for UI elements.
-
-    Gemini API (Google AI): Integrated to provide intelligent data insights.
-
-⚙️ Setup & Installation
+## ⚙️ Setup & Installation
 
 This application is a single HTML file and does not require complex installation.
 
@@ -81,12 +65,3 @@ This application is a single HTML file and does not require complex installation
     Open in Browser: Simply open the index.html file using any modern web browser (e.g., Chrome, Firefox, Edge, Safari).
 
 No server or external dependencies (other than the CDN links which are automatically fetched) are required to run the application.
-🙏 Credits
-
-    Google Gemini API: For powering the AI data insights.
-
-    Chart.js & Chart.js Luxon Adapter: For the charting capabilities.
-
-    Tailwind CSS: For the utility-first CSS framework.
-
-    Phosphor Icons: For the beautiful icons.
