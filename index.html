@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Data Visualization</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&family=Playfair+Display:ital,wght@1,400;1,700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/dist/phosphor.js"></script>
+    <style>
+        :root {
+            --bg-body: #f0f0f0;
+            --bg-container: #ffffff;
+            --text-heading: #000000;
+            --text-data-orange: #ff6600;
+            --text-hot-red: #ff0000;
+            --text-label: #374151;
+            --text-placeholder: #6b7280;
+            --border-default: #d1d5db;
+            --input-bg: #f9fafb;
+            --chart-bg: #ffffff;
+            --chart-border: #e5e7eb;
+            --upload-bg: #ffffff;
+            --upload-border: #d1d5db;
+            --icon-color: #4f46e5;
+            --tooltip-bg: rgba(31, 41, 55, 0.9);
+            --tooltip-text: #ffffff;
+            --shadow-subtle: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0px 10px 15px rgba(0, 0, 0, 0.15);
+            --shadow-strong: 0px 20px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .dark {
+            --bg-body: #1a202c;
+            --bg-container: #2d3748;
+            --text-heading: #f7fafc;
+            --text-data-orange: #ff9933;
+            --text-hot-red: #ff4d4d;
+            --text-label: #e2e8f0;
+            --text-placeholder: #a0aec0;
+            --border-default: #4a5568;
+            --input-bg: #212935;
+            --chart-bg: #2d3748;
+            --chart-border: #4a5568;
+            --upload-bg: #2d3748;
+            --upload-border: #4a5568;
+            --icon-color: #6366f1;
+            --tooltip-bg: rgba(237, 242, 247, 0.9);
+            --tooltip-text: #1a202c;
+            --shadow-subtle: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            --shadow-medium: 0px 10px 15px rgba(0, 0, 0, 0.3);
+            --shadow-strong: 0px 20px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            transition: background-color 0.3s ease-in-out;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: auto;
+            padding: 2.5rem;
+            background-color: var(--bg-container);
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-strong);
+            transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            position: relative;
+        }
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: var(--text-label);
+            transition: color 0.3s ease-in-out;
+        }
+        .input-group input[type="file"],
+        .input-group select {
+            border: 1px solid var(--border-default);
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: all 0.2s ease-in-out;
+            background-color: var(--input-bg);
+            color: var(--text-label);
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1em;
+            box-shadow: var(--shadow-subtle);
+            font-family: 'Inter', sans-serif;
+        }
+        .dark .input-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23a0aec0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        }
+        .input-group input[type="file"]:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--icon-color);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+            background-color: var(--bg-container);
+        }
+        .btn-primary {
+            background-image: linear-gradient(to right, #6366f1, #4f46e5);
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            border-radius: 1rem;
+            padding: 0.75rem 2rem;
+            box-shadow: var(--shadow-medium);
+            position: relative;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-primary:hover {
+            background-image: linear-gradient(to right, #4f46e5, #4338ca);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-2px);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-subtle);
+        }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%, -50%);
+            transition: all 0.5s ease-out;
+        }
+        .btn-primary:active::after {
+            transform: scale(200, 200) translate(-50%, -50%);
+            opacity: 1;
+            transition: 0s;
+        }
+
+        canvas {
+            background-color: var(--chart-bg);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-medium);
+            width: 100% !important;
+            height: 100% !important;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out, background-color 0.3s ease-in-out;
+        }
+        .hidden {
+            display: none;
+        }
+        #messageBox {
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-medium);
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            transform: translateY(calc(100% + 1.5rem));
+            opacity: 0;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+            font-family: 'Inter', sans-serif;
+        }
+        #messageBox.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        #messageBox.bg-red-500 {
+            background-color: #ef4444;
+        }
+        #messageBox.bg-green-500 {
+            background-color: #22c55e;
+        }
+        #messageBox .icon {
+            margin-right: 0.75rem;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--icon-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            transition: border-top-color 0.3s ease-in-out;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .file-upload-area {
+            border: 1px solid var(--border-default);
+            transition: border-color 0.3s ease-in-out, background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            background-color: var(--upload-bg);
+            color: var(--text-label);
+            box-shadow: var(--shadow-medium);
+            padding: 3rem 2rem;
+            font-family: 'Inter', sans-serif;
+        }
+        .file-upload-area.drag-over {
+            border-color: var(--icon-color);
+            background-color: var(--upload-bg);
+            box-shadow: var(--shadow-strong);
+        }
+        .file-upload-area .ph-upload-simple {
+            color: var(--icon-color);
+            transition: color 0.3s ease-in-out;
+        }
+        .file-upload-area label span {
+            color: var(--icon-color);
+            transition: color 0.3s ease-in-out;
+        }
+        #controls.fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chart-fade-in {
+            animation: chartFadeIn 0.8s ease-out forwards;
+        }
+        @keyframes chartFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        #themeToggle {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: var(--input-bg);
+            border: 1px solid var(--border-default);
+            border-radius: 9999px;
+            padding: 0.6rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-subtle);
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s, box-shadow 0.3s;
+        }
+        #themeToggle:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-medium);
+        }
+        #themeToggle i {
+            color: var(--text-label);
+            font-size: 1.5rem;
+        }
+
+        #insightsSection {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-default);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow-medium);
+            color: var(--text-label);
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s;
+        }
+        #insightsSection h2 {
+            color: var(--text-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            transition: color 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+        #insightsText {
+            white-space: pre-wrap;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .main-title-container {
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+            font-family: 'Times New Roman', serif;
+        }
+        .main-title-data {
+            font-size: 4.5rem;
+            font-weight: normal;
+            font-style: italic;
+            color: var(--text-data-orange);
+            line-height: 1;
+            margin-right: 0.5rem;
+        }
+        .main-title-drop {
+            font-size: 4.5rem;
+            font-weight: normal;
+            color: var(--text-heading);
+            line-height: 1;
+        }
+        .subtitle {
+            font-size: 1.8rem;
+            font-weight: normal;
+            color: var(--text-heading);
+            margin-top: 0;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+        }
+        .subtitle-hot {
+            color: var(--text-hot-red);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="container mx-auto p-6 md:p-8 lg:p-10 rounded-xl shadow-2xl">
+        <button id="themeToggle" class="focus:outline-none">
+            <i id="themeIcon" class="ph-sun-fill"></i>
+        </button>
+
+        <div class="main-title-container">
+            <span class="main-title-data">Data</span><span class="main-title-drop">Drop</span>
+        </div>
+        <p class="subtitle">Drop it <span class="subtitle-hot">Hot</span></p>
+
+        <div id="fileUploadArea" class="mb-8 p-6 rounded-xl border flex flex-col items-center justify-center text-center file-upload-area">
+            <i class="ph-upload-simple text-5xl mb-4"></i>
+            <label for="csvFile" class="block text-xl font-semibold text-label mb-3 cursor-pointer">
+                Drag & Drop your CSV file here or <span class="underline">Browse</span>
+            </label>
+            <input type="file" id="csvFile" accept=".csv" class="hidden">
+            <span id="csvFileName" class="text-placeholder text-sm mt-2">No file chosen</span>
+        </div>
+
+        <div id="controls" class="grid grid-cols-1 md:grid-cols-2 lg:col-span-3 gap-8 mb-8 hidden opacity-0">
+            <div class="input-group">
+                <label for="chartType" class="label">Select Chart Type:</label>
+                <select id="chartType" class="select-field">
+                    <option value="">-- Select Chart Type --</option>
+                    <option value="bar">Bar Chart</option>
+                    <option value="line">Line Chart</option>
+                    <option value="pie">Pie Chart</option>
+                    <option value="scatter">Scatter Plot</option>
+                </select>
+            </div>
+
+            <div class="input-group" id="xAxisSelectGroup">
+                <label for="xAxisColumn" class="label">Select X-Axis Column:</label>
+                <select id="xAxisColumn" class="select-field">
+                    <option value="">-- Select X-Axis --</option>
+                </select>
+            </div>
+
+            <div class="input-group" id="yAxisSelectGroup">
+                <label for="yAxisColumn" class="label">Select Y-Axis Column:</label>
+                <select id="yAxisColumn" class="select-field">
+                    <option value="">-- Select Y-Axis --</option>
+                </select>
+            </div>
+
+            <div class="input-group hidden" id="pieValueSelectGroup">
+                <label for="pieValueColumn" class="label">Select Value Column (for Pie):</label>
+                <select id="pieValueColumn" class="select-field">
+                    <option value="">-- Select Value --</option>
+                </select>
+            </div>
+
+            <div class="input-group hidden" id="pieLabelSelectGroup">
+                <label for="pieLabelColumn" class="label">Select Label Column (for Pie):</label>
+                <select id="pieLabelColumn" class="select-field">
+                    <option value="">-- Select Label --</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2 lg:col-span-3 flex justify-center mt-6">
+                <button id="generateChartBtn" class="btn-primary px-8 py-3 w-auto">Generate Chart</button>
+            </div>
+        </div>
+
+        <div id="chartContainer" class="mt-10 p-8 rounded-xl border min-h-[400px] flex items-center justify-center relative shadow-inner" style="background-color: var(--chart-bg); border-color: var(--chart-border);">
+            <canvas id="myChart" class="hidden"></canvas>
+            <div id="chartPlaceholder" class="text-placeholder text-center flex flex-col items-center">
+                <i class="ph-chart-bar text-7xl mb-4" style="color: var(--text-placeholder);"></i>
+                <p class="text-xl font-medium">Upload a CSV and select options to visualize your data.</p>
+                <p class="text-sm mt-2">Supports Bar, Line, Pie, and Scatter charts.</p>
+            </div>
+            <div id="loadingSpinner" class="hidden absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-xl">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <div id="insightsSection" class="hidden mt-10">
+            <h2 class="text-heading">✨ Data Insights ✨</h2>
+            <p id="insightsText" class="text-label mt-4"></p>
+            <div id="insightsLoadingSpinner" class="hidden absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-xl">
+                <div class="spinner"></div>
+            </div>
+        </div>
+        <div id="insightsButtonContainer" class="flex justify-center mt-6 hidden">
+            <button id="getInsightsBtn" class="btn-primary px-8 py-3 w-auto">✨ Get Data Insights ✨</button>
+        </div>
+
+
+        <div id="messageBox" class="fixed bottom-4 right-4 text-white p-4 rounded-lg shadow-lg hidden">
+            <i id="messageIcon" class="icon text-2xl"></i>
+            <span id="messageText" class="font-medium"></span>
+            <button class="ml-4 text-white font-bold opacity-75 hover:opacity-100 transition-opacity" onclick="document.getElementById('messageBox').classList.remove('show')">
+                <i class="ph-x text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let parsedData = [];
+        let headers = [];
+        let columnTypes = {};
+        let myChartInstance = null;
+
+        let currentChartType = '';
+        let currentXAxis = '';
+        let currentYAxis = '';
+        let currentPieValue = '';
+        let currentPieLabel = '';
+
+        const csvFile = document.getElementById('csvFile');
+        const csvFileNameSpan = document.getElementById('csvFileName');
+        const controls = document.getElementById('controls');
+        const chartTypeSelect = document.getElementById('chartType');
+        const xAxisColumnSelect = document.getElementById('xAxisColumn');
+        const yAxisColumnSelect = document.getElementById('yAxisColumn');
+        const pieValueColumnSelect = document.getElementById('pieValueColumn');
+        const pieLabelColumnSelect = document.getElementById('pieLabelColumn');
+        const generateChartBtn = document.getElementById('generateChartBtn');
+        const chartContainer = document.getElementById('chartContainer');
+        const myChartCanvas = document.getElementById('myChart');
+        const chartPlaceholder = document.getElementById('chartPlaceholder');
+        const xAxisSelectGroup = document.getElementById('xAxisSelectGroup');
+        const yAxisSelectGroup = document.getElementById('yAxisSelectGroup');
+        const pieValueSelectGroup = document.getElementById('pieValueSelectGroup');
+        const pieLabelSelectGroup = document.getElementById('pieLabelSelectGroup');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageIcon = document.getElementById('messageIcon');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+        const container = document.querySelector('.container');
+
+        const getInsightsBtn = document.getElementById('getInsightsBtn');
+        const insightsSection = document.getElementById('insightsSection');
+        const insightsText = document.getElementById('insightsText');
+        const insightsLoadingSpinner = document.getElementById('insightsLoadingSpinner');
+        const insightsButtonContainer = document.getElementById('insightsButtonContainer');
+
+        function updateChartDefaults() {
+            const isDarkMode = body.classList.contains('dark');
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-label');
+            const gridColor = isDarkMode ? 'rgba(74, 85, 104, 0.5)' : '#e5e7eb';
+            const titleColor = getComputedStyle(document.documentElement).getPropertyValue('--text-heading');
+            const tooltipBg = getComputedStyle(document.documentElement).getPropertyValue('--tooltip-bg');
+            const tooltipText = getComputedStyle(document.documentElement).getPropertyValue('--tooltip-text');
+
+            Chart.defaults.color = textColor;
+            Chart.defaults.borderColor = gridColor;
+            Chart.defaults.plugins.legend.labels.color = textColor;
+            Chart.defaults.plugins.title.color = titleColor;
+            Chart.defaults.plugins.tooltip.backgroundColor = tooltipBg;
+            Chart.defaults.plugins.tooltip.titleColor = tooltipText;
+            Chart.defaults.plugins.tooltip.bodyColor = tooltipText;
+
+            if (myChartInstance) {
+                const currentConfig = myChartInstance.config;
+                destroyChart();
+                myChartInstance = new Chart(myChartCanvas, currentConfig);
+            }
+        }
+
+        function enableDarkMode() {
+            body.classList.add('dark');
+            container.classList.add('dark-shadow');
+            themeIcon.classList.remove('ph-sun-fill');
+            themeIcon.classList.add('ph-moon-fill');
+            localStorage.setItem('theme', 'dark');
+            updateChartDefaults();
+        }
+
+        function disableDarkMode() {
+            body.classList.remove('dark');
+            container.classList.remove('dark-shadow');
+            themeIcon.classList.remove('ph-moon-fill');
+            themeIcon.classList.add('ph-sun-fill');
+            localStorage.setItem('theme', 'light');
+            updateChartDefaults();
+        }
+
+        function toggleTheme() {
+            if (body.classList.contains('dark')) {
+                disableDarkMode();
+            } else {
+                enableDarkMode();
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            enableDarkMode();
+        } else {
+            disableDarkMode();
+        }
+
+        themeToggle.addEventListener('click', toggleTheme);
+
+        function showMessage(message, type = 'error') {
+            messageText.textContent = message;
+            messageBox.classList.remove('bg-red-500', 'bg-green-500');
+            messageIcon.className = 'icon text-2xl';
+
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-500');
+                messageIcon.classList.add('ph-x-circle');
+            } else {
+                messageBox.classList.add('bg-green-500');
+                messageIcon.classList.add('ph-check-circle');
+            }
+            messageBox.classList.remove('hidden');
+            messageBox.classList.add('show');
+
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 5000);
+        }
+
+        function showLoadingSpinner(show) {
+            if (show) {
+                loadingSpinner.classList.remove('hidden');
+                chartPlaceholder.classList.add('hidden');
+                myChartCanvas.classList.add('hidden');
+            } else {
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        function showInsightsLoadingSpinner(show) {
+            if (show) {
+                insightsLoadingSpinner.classList.remove('hidden');
+                insightsText.textContent = '';
+                insightsSection.classList.remove('hidden');
+            } else {
+                insightsLoadingSpinner.classList.add('hidden');
+            }
+        }
+
+        function detectColumnTypes(data, headers) {
+            const types = {};
+            const sampleSize = Math.min(data.length, 100);
+            headers.forEach(header => {
+                let isNumeric = true;
+                let isDate = true;
+                for (let i = 0; i < sampleSize; i++) {
+                    const value = data[i][header];
+                    if (value === undefined || value === null || value.trim() === '') {
+                        continue;
+                    }
+                    if (isNaN(Number(value))) {
+                        isNumeric = false;
+                    }
+                    if (isNaN(new Date(value).getTime())) {
+                        isDate = false;
+                    }
+                    if (!isNumeric && !isDate) break;
+                }
+                if (isNumeric) {
+                    types[header] = 'number';
+                } else if (isDate) {
+                    types[header] = 'date';
+                } else {
+                    types[header] = 'string';
+                }
+            });
+            return types;
+        }
+
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim() !== '');
+            if (lines.length === 0) {
+                showMessage("The uploaded CSV file is empty.", "error");
+                return { headers: [], data: [] };
+            }
+
+            headers = lines[0].split(',').map(header => header.trim());
+            const dataRows = lines.slice(1);
+
+            const parsed = dataRows.map(row => {
+                const values = row.split(',').map(value => value.trim());
+                const rowObject = {};
+                headers.forEach((header, index) => {
+                    rowObject[header] = values[index];
+                });
+                return rowObject;
+            });
+            columnTypes = detectColumnTypes(parsed, headers);
+            return { headers, data: parsed };
+        }
+
+        function populateColumnSelects() {
+            xAxisColumnSelect.innerHTML = '<option value="">-- Select X-Axis --</option>';
+            yAxisColumnSelect.innerHTML = '<option value="">-- Select Y-Axis --</option>';
+            pieValueColumnSelect.innerHTML = '<option value="">-- Select Value --</option>';
+            pieLabelColumnSelect.innerHTML = '<option value="">-- Select Label --</option>';
+
+            headers.forEach(header => {
+                const optionX = document.createElement('option');
+                optionX.value = header;
+                optionX.textContent = `${header} (${columnTypes[header]})`;
+                xAxisColumnSelect.appendChild(optionX);
+
+                const optionY = document.createElement('option');
+                optionY.value = header;
+                optionY.textContent = `${header} (${columnTypes[header]})`;
+                if (columnTypes[header] !== 'number') {
+                    optionY.disabled = true;
+                    optionY.style.color = '#a0aec0';
+                }
+                yAxisColumnSelect.appendChild(optionY);
+
+                const optionPieValue = document.createElement('option');
+                optionPieValue.value = header;
+                optionPieValue.textContent = `${header} (${columnTypes[header]})`;
+                if (columnTypes[header] !== 'number') {
+                    optionPieValue.disabled = true;
+                    optionPieValue.style.color = '#a0aec0';
+                }
+                pieValueColumnSelect.appendChild(optionPieValue);
+
+                const optionPieLabel = document.createElement('option');
+                optionPieLabel.value = header;
+                optionPieLabel.textContent = `${header} (${columnTypes[header]})`;
+                pieLabelColumnSelect.appendChild(optionPieLabel);
+            });
+        }
+
+        function handleFile(file) {
+            if (file && file.name.endsWith('.csv')) {
+                csvFileNameSpan.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    showLoadingSpinner(true);
+                    const { headers: newHeaders, data: newParsedData } = parseCSV(e.target.result);
+                    headers = newHeaders;
+                    parsedData = newParsedData;
+
+                    if (parsedData.length > 0) {
+                        populateColumnSelects();
+                        controls.classList.remove('hidden');
+                        controls.classList.add('fade-in');
+
+                        chartPlaceholder.classList.remove('hidden');
+                        myChartCanvas.classList.add('hidden');
+                        if (myChartInstance) {
+                            myChartInstance.destroy();
+                            myChartInstance = null;
+                        }
+                        chartTypeSelect.value = "";
+                        insightsSection.classList.add('hidden');
+                        insightsButtonContainer.classList.add('hidden');
+                        showMessage("CSV file loaded successfully. Now select chart options.", "success");
+                    } else {
+                        controls.classList.add('hidden');
+                        insightsSection.classList.add('hidden');
+                        insightsButtonContainer.classList.add('hidden');
+                        showMessage("No valid data found in the CSV file after parsing. Ensure it's not empty and correctly formatted.", "error");
+                    }
+                    showLoadingSpinner(false);
+                };
+                reader.readAsText(file);
+            } else {
+                csvFileNameSpan.textContent = 'No file chosen';
+                controls.classList.add('hidden');
+                chartPlaceholder.classList.remove('hidden');
+                myChartCanvas.classList.add('hidden');
+                if (myChartInstance) {
+                    myChartInstance.destroy();
+                    myChartInstance = null;
+                }
+                insightsSection.classList.add('hidden');
+                insightsButtonContainer.classList.add('hidden');
+                showMessage("Please select a valid CSV file.", "error");
+            }
+        }
+
+        csvFile.addEventListener('change', (event) => {
+            handleFile(event.target.files[0]);
+        });
+
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('drag-over');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('drag-over');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        chartTypeSelect.addEventListener('change', () => {
+            const selectedType = chartTypeSelect.value;
+            xAxisSelectGroup.classList.add('hidden');
+            yAxisSelectGroup.classList.add('hidden');
+            pieValueSelectGroup.classList.add('hidden');
+            pieLabelSelectGroup.classList.add('hidden');
+            insightsSection.classList.add('hidden');
+            insightsButtonContainer.classList.add('hidden');
+
+            if (selectedType === 'bar' || selectedType === 'line' || selectedType === 'scatter') {
+                xAxisSelectGroup.classList.remove('hidden');
+                yAxisSelectGroup.classList.remove('hidden');
+            } else if (selectedType === 'pie') {
+                pieValueSelectGroup.classList.remove('hidden');
+                pieLabelSelectGroup.classList.remove('hidden');
+            }
+            populateColumnSelectsForChartType(selectedType);
+        });
+
+        function populateColumnSelectsForChartType(selectedType) {
+            xAxisColumnSelect.innerHTML = '<option value="">-- Select X-Axis --</option>';
+            yAxisColumnSelect.innerHTML = '<option value="">-- Select Y-Axis --</option>';
+            pieValueColumnSelect.innerHTML = '<option value="">-- Select Value --</option>';
+            pieLabelColumnSelect.innerHTML = '<option value="">-- Select Label --</option>';
+
+            headers.forEach(header => {
+                const optionX = document.createElement('option');
+                optionX.value = header;
+                optionX.textContent = `${header} (${columnTypes[header]})`;
+                xAxisColumnSelect.appendChild(optionX);
+
+                const optionY = document.createElement('option');
+                optionY.value = header;
+                optionY.textContent = `${header} (${columnTypes[header]})`;
+                if (columnTypes[header] !== 'number') {
+                    optionY.disabled = true;
+                    optionY.style.color = '#a0aec0';
+                }
+                yAxisColumnSelect.appendChild(optionY);
+
+                const optionPieValue = document.createElement('option');
+                optionPieValue.value = header;
+                optionPieValue.textContent = `${header} (${columnTypes[header]})`;
+                if (columnTypes[header] !== 'number') {
+                    optionPieValue.disabled = true;
+                    optionPieValue.style.color = '#a0aec0';
+                }
+                pieValueColumnSelect.appendChild(optionPieValue);
+
+                const optionPieLabel = document.createElement('option');
+                optionPieLabel.value = header;
+                optionPieLabel.textContent = `${header} (${columnTypes[header]})`;
+                pieLabelColumnSelect.appendChild(optionPieLabel);
+            });
+        }
+
+        function destroyChart() {
+            if (myChartInstance) {
+                myChartInstance.destroy();
+                myChartInstance = null;
+            }
+        }
+
+        function getRandomColors(count) {
+            const colors = [];
+            for (let i = 0; i < count; i++) {
+                const hue = (i * 137.508) % 360;
+                colors.push(`hsla(${hue}, 70%, 50%, 0.8)`);
+            }
+            return colors;
+        }
+
+        generateChartBtn.addEventListener('click', () => {
+            currentChartType = chartTypeSelect.value;
+            currentXAxis = xAxisColumnSelect.value;
+            currentYAxis = yAxisColumnSelect.value;
+            currentPieValue = pieValueColumnSelect.value;
+            currentPieLabel = pieLabelColumnSelect.value;
+
+            let chartConfig = {};
+            let chartData = {};
+            let chartOptions = {};
+
+            destroyChart();
+
+            if (!currentChartType) {
+                showMessage("Please select a chart type.", "error");
+                return;
+            }
+
+            if (parsedData.length === 0) {
+                showMessage("No data loaded. Please upload a CSV file first.", "error");
+                return;
+            }
+
+            showLoadingSpinner(true);
+            insightsSection.classList.add('hidden');
+            insightsButtonContainer.classList.add('hidden');
+
+            setTimeout(() => {
+                try {
+                    const isDarkMode = body.classList.contains('dark');
+                    const labelColor = getComputedStyle(document.documentElement).getPropertyValue('--text-label');
+                    const titleColor = getComputedStyle(document.documentElement).getPropertyValue('--text-heading');
+                    const gridLineColor = isDarkMode ? 'rgba(74, 85, 104, 0.3)' : '#e5e7eb';
+                    const axisTitleColor = getComputedStyle(document.documentElement).getPropertyValue('--text-label');
+                    const tooltipBgColor = getComputedStyle(document.documentElement).getPropertyValue('--tooltip-bg');
+                    const tooltipTextColor = getComputedStyle(document.documentElement).getPropertyValue('--tooltip-text');
+
+                    const chartFontFamily = 'Inter, sans-serif';
+
+                    if (currentChartType === 'bar' || currentChartType === 'line') {
+                        if (!currentXAxis || !currentYAxis) {
+                            showMessage("Please select both X-Axis and Y-Axis columns.", "error");
+                            chartPlaceholder.classList.remove('hidden');
+                            showLoadingSpinner(false);
+                            return;
+                        }
+                        if (columnTypes[currentYAxis] !== 'number') {
+                            showMessage(`Y-Axis column '${currentYAxis}' is not numeric. Please select a numeric column for the Y-Axis.`, "error");
+                            chartPlaceholder.classList.remove('hidden');
+                            showLoadingSpinner(false);
+                            return;
+                        }
+
+                        const labels = parsedData.map(row => row[currentXAxis]);
+                        const values = parsedData.map(row => parseFloat(row[currentYAxis]));
+                        const backgroundColors = getRandomColors(labels.length);
+                        const borderColors = backgroundColors.map(color => color.replace('0.8', '1'));
+
+                        let xScaleType = 'category';
+                        if (columnTypes[currentXAxis] === 'date') {
+                            xScaleType = 'time';
+                        }
+
+                        chartOptions = {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: { duration: 1000, easing: 'easeOutQuart' },
+                            plugins: {
+                                legend: { labels: { font: { size: 14, family: chartFontFamily }, color: labelColor } },
+                                title: { display: true, text: `${currentChartType === 'bar' ? 'Bar Chart' : 'Line Chart'} of ${currentYAxis} by ${currentXAxis}`, font: { size: 18, weight: 'bold', family: chartFontFamily }, color: titleColor },
+                                tooltip: { backgroundColor: tooltipBgColor, titleFont: { size: 14, weight: 'bold', family: chartFontFamily }, bodyFont: { size: 12, family: chartFontFamily }, titleColor: tooltipTextColor, bodyColor: tooltipTextColor, padding: 12, boxPadding: 6, cornerRadius: 6 }
+                            },
+                            scales: {
+                                x: {
+                                    type: xScaleType,
+                                    title: { display: true, text: currentXAxis, font: { size: 16, weight: '600', family: chartFontFamily }, color: axisTitleColor },
+                                    ticks: { color: labelColor },
+                                    grid: { color: gridLineColor, drawBorder: false },
+                                    time: xScaleType === 'time' ? { unit: 'day' } : undefined
+                                },
+                                y: {
+                                    title: { display: true, text: currentYAxis, font: { size: 16, weight: '600', family: chartFontFamily }, color: axisTitleColor },
+                                    beginAtZero: true,
+                                    ticks: { color: labelColor },
+                                    grid: { color: gridLineColor, drawBorder: false }
+                                }
+                            }
+                        };
+                        chartData = {
+                            labels: labels,
+                            datasets: [{
+                                label: currentYAxis,
+                                data: values,
+                                backgroundColor: backgroundColors,
+                                borderColor: borderColors,
+                                borderWidth: 1,
+                                fill: currentChartType === 'line',
+                                tension: 0.4,
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.8
+                            }]
+                        };
+
+                    } else if (currentChartType === 'pie') {
+                        if (!currentPieValue || !currentPieLabel) {
+                            showMessage("Please select both Value and Label columns for the Pie Chart.", "error");
+                            chartPlaceholder.classList.remove('hidden');
+                            showLoadingSpinner(false);
+                            return;
+                        }
+                        if (columnTypes[currentPieValue] !== 'number') {
+                            showMessage(`Value column '${currentPieValue}' is not numeric. Please select a numeric column for values.`, "error");
+                            chartPlaceholder.classList.remove('hidden');
+                            showLoadingSpinner(false);
+                            return;
+                        }
+
+                        const labels = parsedData.map(row => row[currentPieLabel]);
+                        const values = parsedData.map(row => parseFloat(row[currentPieValue]));
+                        const backgroundColors = getRandomColors(labels.length);
+
+                        chartOptions = {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: { animateRotate: true, animateScale: true },
+                            plugins: {
+                                legend: { position: 'top', labels: { font: { size: 14, family: chartFontFamily }, color: labelColor } },
+                                title: { display: true, text: `Pie Chart of ${currentPieValue} by ${currentPieLabel}`, font: { size: 18, weight: 'bold', family: chartFontFamily }, color: titleColor },
+                                tooltip: {
+                                    backgroundColor: tooltipBgColor, titleFont: { size: 14, weight: 'bold', family: chartFontFamily }, bodyFont: { size: 12, family: chartFontFamily }, titleColor: tooltipTextColor, bodyColor: tooltipTextColor, padding: 12, boxPadding: 6, cornerRadius: 6,
+                                    callbacks: { label: function(context) { let label = context.label || ''; if (label) { label += ': '; } if (context.parsed !== null) { label += new Intl.NumberFormat('en-US', { style: 'decimal' }).format(context.parsed); } return label; } }
+                                }
+                            }
+                        };
+                        chartData = {
+                            labels: labels,
+                            datasets: [{
+                                data: values,
+                                backgroundColor: backgroundColors,
+                                borderColor: isDarkMode ? 'var(--chart-bg)' : '#ffffff',
+                                borderWidth: 2
+                            }]
+                        };
+
+                    } else if (currentChartType === 'scatter') {
+                        if (!currentXAxis || !currentYAxis) {
+                            showMessage("Please select both X-Axis and Y-Axis columns.", "error");
+                            chartPlaceholder.classList.remove('hidden');
+                            showLoadingSpinner(false);
+                            return;
+                        }
+                        if (columnTypes[currentXAxis] !== 'number' || columnTypes[currentYAxis] !== 'number') {
+                            showMessage(`Both X-Axis ('${currentXAxis}') and Y-Axis ('${currentYAxis}') columns must be numeric for Scatter Plot.`, "error");
+                            chartPlaceholder.classList.remove('hidden');
+                            showLoadingSpinner(false);
+                            return;
+                        }
+
+                        const dataPoints = parsedData.map(row => ({
+                            x: parseFloat(row[currentXAxis]),
+                            y: parseFloat(row[currentYAxis])
+                        }));
+
+                        const backgroundColors = isDarkMode ? 'rgba(99, 102, 241, 0.8)' : 'rgba(79, 70, 229, 0.8)';
+                        const borderColors = isDarkMode ? 'rgba(99, 102, 241, 1)' : 'rgba(79, 70, 229, 1)';
+
+                        chartOptions = {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: { duration: 1000, easing: 'easeOutQuart' },
+                            plugins: {
+                                legend: { labels: { font: { size: 14, family: chartFontFamily }, color: labelColor } },
+                                title: { display: true, text: `Scatter Plot of ${currentYAxis} vs ${currentXAxis}`, font: { size: 18, weight: 'bold', family: chartFontFamily }, color: titleColor },
+                                tooltip: { backgroundColor: tooltipBgColor, titleFont: { size: 14, weight: 'bold', family: chartFontFamily }, bodyFont: { size: 12, family: chartFontFamily }, titleColor: tooltipTextColor, bodyColor: tooltipTextColor, padding: 12, boxPadding: 6, cornerRadius: 6 }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'linear',
+                                    position: 'bottom',
+                                    title: { display: true, text: currentXAxis, font: { size: 16, weight: '600', family: chartFontFamily }, color: axisTitleColor },
+                                    grid: { color: gridLineColor, drawBorder: false },
+                                    ticks: { color: labelColor }
+                                },
+                                y: {
+                                    title: { display: true, text: currentYAxis, font: { size: 16, weight: '600', family: chartFontFamily }, color: axisTitleColor },
+                                    grid: { color: gridLineColor, drawBorder: false },
+                                    ticks: { color: labelColor }
+                                }
+                            }
+                        };
+                        chartData = {
+                            datasets: [{
+                                label: `${currentYAxis} vs ${currentXAxis}`,
+                                data: dataPoints,
+                                backgroundColor: backgroundColors,
+                                borderColor: borderColors,
+                                pointRadius: 6,
+                                pointBackgroundColor: isDarkMode ? 'var(--chart-bg)' : 'white',
+                                pointBorderWidth: 2,
+                                pointBorderColor: isDarkMode ? 'rgba(99, 102, 241, 1)' : 'rgba(79, 70, 229, 1)',
+                            }]
+                        };
+                    }
+
+                    chartConfig = {
+                        type: currentChartType,
+                        data: chartData,
+                        options: chartOptions
+                    };
+
+                    myChartInstance = new Chart(myChartCanvas, chartConfig);
+                    myChartCanvas.classList.remove('hidden');
+                    myChartCanvas.classList.add('chart-fade-in');
+                    showMessage("Chart generated successfully!", "success");
+                    insightsButtonContainer.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error("Error generating chart:", error);
+                    showMessage("An error occurred while generating the chart. Please check your data and selections: " + error.message, "error");
+                    chartPlaceholder.classList.remove('hidden');
+                    myChartCanvas.classList.add('hidden');
+                } finally {
+                    showLoadingSpinner(false);
+                }
+            }, 100);
+        });
+
+        getInsightsBtn.addEventListener('click', async () => {
+            if (!parsedData || parsedData.length === 0) {
+                showMessage("No data available for insights. Please upload a CSV and generate a chart first.", "error");
+                return;
+            }
+
+            showInsightsLoadingSpinner(true);
+            insightsText.textContent = 'Generating insights...';
+
+            let prompt = `Analyze the following data, which is being visualized as a ${currentChartType} chart. `;
+            prompt += `The dataset has the following columns: ${headers.map(h => `${h} (${columnTypes[h]})`).join(', ')}. `;
+
+            if (currentChartType === 'bar' || currentChartType === 'line' || currentChartType === 'scatter') {
+                prompt += `The X-axis represents '${currentXAxis}' and the Y-axis represents '${currentYAxis}'. `;
+            } else if (currentChartType === 'pie') {
+                prompt += `The values are from '${currentPieValue}' and the labels are from '${currentPieLabel}'. `;
+            }
+
+            const sampleSize = Math.min(parsedData.length, 20);
+            const sampleData = parsedData.slice(0, sampleSize).map(row => JSON.stringify(row)).join('\n');
+            prompt += `Here's a sample of the data (first ${sampleSize} rows):\n${sampleData}\n\n`;
+            prompt += `Based on this data and its visualization, provide some key insights, trends, or observations. Focus on actionable insights if possible, and highlight any interesting patterns or anomalies. Keep the response concise, around 3-5 bullet points or a short paragraph.`;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    insightsText.textContent = text;
+                    showMessage("Insights generated successfully!", "success");
+                } else {
+                    insightsText.textContent = 'Could not generate insights. The model might not have returned a valid response.';
+                    showMessage("Failed to generate insights. Please try again.", "error");
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                insightsText.textContent = 'An error occurred while fetching insights. Please check the console for details.';
+                showMessage("Error fetching insights: " + error.message, "error");
+            } finally {
+                showInsightsLoadingSpinner(false);
+            }
+        });
+
+        function resizeCanvas() {
+            if (myChartInstance) {
+                myChartInstance.resize();
+            }
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = resizeCanvas;
+        chartPlaceholder.classList.remove('hidden');
+        myChartCanvas.classList.add('hidden');
+        insightsSection.classList.add('hidden');
+        insightsButtonContainer.classList.add('hidden');
+
+        document.querySelector('label[for="csvFile"]').addEventListener('click', () => {
+            csvFile.click();
+        });
+    </script>
+</body>
+</html>
